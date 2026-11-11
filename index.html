@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Murph GTG</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f0f0f">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #161616;
+    --card-hover: #1c1c1c;
+    --text: #ffffff;
+    --muted: #a0a0a0;
+    --accent: #ff4d4d;
+    --accent-soft: #ff6b6b;
+    --gradient: linear-gradient(135deg, #ff4d4d 0%, #ff8a4d 100%);
+    --success: #00d68f;
+    --border: #2a2a2a;
+    --stepup: #1a3a1a;
+    --retest: #3a2a0a;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    padding: 24px 20px 16px;
+    background: linear-gradient(180deg, #1a0a0a 0%, #0a0a0a 100%);
+  }
+  .greeting {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  header h1 {
+    margin: 4px 0 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .date {
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .container {
+    padding: 0 16px 40px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .progress-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 20px;
+  }
+  .ring {
+    width: 120px;
+    height: 120px;
+    position: relative;
+  }
+  .ring svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: #2a2a2a; stroke-width: 8; }
+  .ring-fg {
+    fill: none;
+    stroke: url(#grad);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease;
+  }
+  .ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .ring-text .pct { font-size: 22px; }
+  .ring-text .label { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .focus-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .focus {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .badge.stepup { background: var(--stepup); color: #4ade80; }
+  .badge.retest { background: var(--retest); color: #fbbf24; }
+  .primary {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 6px 0 4px;
+  }
+  .secondary {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 16px;
+    line-height: 1.45;
+  }
+  .sets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    gap: 12px;
+  }
+  .set-btn {
+    aspect-ratio: 1;
+    border: none;
+    background: #222;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .set-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gradient);
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .set-btn.done {
+    background: transparent;
+  }
+  .set-btn.done::after { opacity: 1; }
+  .set-btn span { position: relative; z-index: 1; }
+  .set-btn:active { transform: scale(0.94); }
+  .progress-text {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  .nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .nav button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    background: #1c1c1c;
+    color: white;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid var(--border);
+  }
+  .nav button.primary {
+    background: var(--gradient);
+    border: none;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    padding: 10px 16px 30px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="greeting">Today’s Session</div>
+  <h1>Murph GTG</h1>
+  <div class="date" id="headerDate"></div>
+</header>
+
+<div class="container">
+  <div class="progress-ring-wrap" id="ringWrap" style="display:none;">
+    <div class="ring">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff4d4d"/>
+            <stop offset="100%" stop-color="#ff8a4d"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="60" cy="60" r="50"/>
+        <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314"/>
+      </svg>
+      <div class="ring-text">
+        <div class="pct" id="ringPct">0%</div>
+        <div class="label">Complete</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button id="prevDay">← Prev</button>
+    <button id="todayBtn" class="primary">Today</button>
+    <button id="nextDay">Next →</button>
+  </div>
+
+  <div class="card" id="workoutCard">
+    <div class="focus-row">
+      <h2 class="focus" id="focus"></h2>
+      <span id="badge"></span>
+    </div>
+    <div class="primary" id="primary"></div>
+    <div class="secondary" id="secondary"></div>
+    <div class="sets" id="sets"></div>
+    <div class="progress-text" id="progress"></div>
+    <div class="note" id="note"></div>
+  </div>
+</div>
+
+<footer>Stop 2–3 reps short of failure · Weekends rest · Saved on this device</footer>
+
+<script>
+const plan = {
+  "Nov 2026": { pull: [1,6], push: [6,6], squat: [8,6], note: "Partial squats only. Easy start." },
+  "Dec 2026": { pull: [1,7], push: [7,6], squat: [9,6], note: "Slight volume up. Full depth if pain-free." },
+  "Jan 2027": { pull: [2,7], push: [8,7], squat: [10,7], note: "Begin vest on some/all push-up sets. Keep easy." },
+  "Feb 2027": { pull: [2,8], push: [9,7], squat: [11,7], note: "Vest on most push-ups. Add to squats only if full-depth is easy." },
+  "Mar 2027": { pull: [2,8], push: [10,8], squat: [12,8], note: "Vest on push-ups and squats (if cleared). Pull-ups unweighted." },
+  "Apr 2027": { pull: [3,7], push: [11,7], squat: [14,7], note: "Vest on push-ups + squats. Optional light vest on some pull-ups if strong." },
+  "May 2027": { pull: [3,6], push: [10,6], squat: [12,6], note: "Taper. Vest on push-ups/squats as desired. Keep quality high." }
+};
+
+const focusMap = { 0: "Pull", 1: "Push", 2: "Legs", 3: "Mix", 4: "Squat + Core" };
+
+let currentDate = new Date();
+currentDate.setHours(0,0,0,0);
+
+function getMonthKey(d) {
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return months[d.getMonth()] + " " + d.getFullYear();
+}
+
+function isWeekday(d) {
+  return d.getDay() >= 1 && d.getDay() <= 5;
+}
+
+function getWorkout(d) {
+  if (!isWeekday(d)) return null;
+  const key = getMonthKey(d);
+  const base = plan[key];
+  if (!base) return null;
+
+  const weekday = d.getDay();
+  const focus = focusMap[weekday - 1];
+  const isRetest = weekday === 1 && d.getDate() <= 7;
+
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  let finalWeekStart = new Date(lastDay);
+  let count = 0;
+  while (count < 5 && finalWeekStart.getMonth() === d.getMonth()) {
+    if (finalWeekStart.getDay() >= 1 && finalWeekStart.getDay() <= 5) count++;
+    if (count < 5) finalWeekStart.setDate(finalWeekStart.getDate() - 1);
+  }
+  const isFinalWeek = d >= finalWeekStart && !isRetest;
+
+  let sets = 0;
+  let primary = "", secondary = "";
+
+  if (isRetest) {
+    return {
+      focus: "RETEST",
+      primary: "Do the 5 max tests fresh",
+      secondary: "Log results. Skip normal GTG. Rest the rest of the day.",
+      sets: 0,
+      isRetest: true,
+      isFinalWeek: false,
+      note: base.note
+    };
+  }
+
+  if (focus === "Pull") {
+    sets = base.pull[1] + (isFinalWeek ? 1 : 0);
+    primary = `${sets} sets of ${base.pull[0]} pull-ups`;
+    secondary = "Add DB rows between sets if fresh" + (key >= "Jan 2027" ? " · Pull-ups stay unweighted" : "");
+  } else if (focus === "Push") {
+    sets = base.push[1] + (isFinalWeek ? 1 : 0);
+    primary = `${sets} sets of ${base.push[0]} push-ups`;
+    secondary = "DB bench or floor press on the bench";
+    if (key >= "Jan 2027") secondary += " · Vest on some or all push-up sets (keep easy)";
+  } else if (focus === "Legs") {
+    sets = base.squat[1] + (isFinalWeek ? 1 : 0);
+    primary = `${sets} sets of ${base.squat[0]} partial/full squats`;
+    secondary = "Goblet squats or lunges with DBs if pain-free";
+    if (key >= "Feb 2027") secondary += " · Add vest to squats only if full-depth is pain-free & easy";
+  } else if (focus === "Mix") {
+    sets = base.pull[1] + (isFinalWeek ? 1 : 0);
+    primary = `Alternate: ${base.pull[0]} pull + ${base.push[0]} push × ${sets} rounds`;
+    secondary = "Keep each mini-set easy";
+    if (key >= "Jan 2027") secondary += " · Vest on the push portion";
+  } else {
+    sets = base.squat[1] + (isFinalWeek ? 1 : 0);
+    primary = `${sets} sets of ${base.squat[0]} squats + core`;
+    secondary = "Planks 20–30s, hollow holds, or DB carries";
+    if (key >= "Feb 2027") secondary += " · Vest on squats if cleared";
+  }
+
+  return {
+    focus,
+    primary: primary + (isFinalWeek ? "" : ""),
+    secondary,
+    sets,
+    isRetest: false,
+    isFinalWeek,
+    note: base.note
+  };
+}
+
+function storageKey(d) {
+  return "gtg-" + d.toISOString().slice(0,10);
+}
+
+function loadDone(d, total) {
+  const raw = localStorage.getItem(storageKey(d));
+  if (!raw) return new Array(total).fill(false);
+  try {
+    const arr = JSON.parse(raw);
+    while (arr.length < total) arr.push(false);
+    return arr.slice(0, total);
+  } catch {
+    return new Array(total).fill(false);
+  }
+}
+
+function saveDone(d, done) {
+  localStorage.setItem(storageKey(d), JSON.stringify(done));
+}
+
+function updateRing(completed, total) {
+  const wrap = document.getElementById("ringWrap");
+  const fg = document.getElementById("ringFg");
+  const pctEl = document.getElementById("ringPct");
+  if (total === 0) {
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "flex";
+  const pct = Math.round((completed / total) * 100);
+  const offset = 314 - (314 * pct / 100);
+  fg.style.strokeDashoffset = offset;
+  pctEl.textContent = pct + "%";
+}
+
+function render() {
+  const w = getWorkout(currentDate);
+  document.getElementById("headerDate").textContent = currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
+  const focusEl = document.getElementById("focus");
+  const badgeEl = document.getElementById("badge");
+  const primaryEl = document.getElementById("primary");
+  const secondaryEl = document.getElementById("secondary");
+  const setsEl = document.getElementById("sets");
+  const progressEl = document.getElementById("progress");
+  const noteEl = document.getElementById("note");
+
+  if (!w) {
+    focusEl.textContent = "Rest";
+    badgeEl.innerHTML = "";
+    primaryEl.textContent = "Weekend";
+    secondaryEl.textContent = "Recover. Optional easy movement is fine.";
+    setsEl.innerHTML = "";
+    progressEl.textContent = "";
+    noteEl.textContent = "";
+    updateRing(0, 0);
+    return;
+  }
+
+  focusEl.textContent = w.focus;
+  badgeEl.innerHTML = "";
+  if (w.isFinalWeek) badgeEl.innerHTML = '<span class="badge stepup">+1 Set</span>';
+  if (w.isRetest) badgeEl.innerHTML = '<span class="badge retest">Retest</span>';
+
+  primaryEl.textContent = w.primary;
+  secondaryEl.textContent = w.secondary;
+  noteEl.textContent = w.note || "";
+
+  setsEl.innerHTML = "";
+  if (w.sets > 0 && !w.isRetest) {
+    const done = loadDone(currentDate, w.sets);
+    done.forEach((isDone, i) => {
+      const btn = document.createElement("button");
+      btn.className = "set-btn" + (isDone ? " done" : "");
+      btn.innerHTML = `<span>${i + 1}</span>`;
+      btn.onclick = () => {
+        done[i] = !done[i];
+        saveDone(currentDate, done);
+        render();
+      };
+      setsEl.appendChild(btn);
+    });
+    const completed = done.filter(Boolean).length;
+    progressEl.textContent = `${completed} of ${w.sets} sets`;
+    updateRing(completed, w.sets);
+  } else {
+    progressEl.textContent = w.isRetest ? "Do the max tests fresh" : "";
+    updateRing(0, 0);
+  }
+}
+
+document.getElementById("prevDay").onclick = () => { currentDate.setDate(currentDate.getDate() - 1); render(); };
+document.getElementById("nextDay").onclick = () => { currentDate.setDate(currentDate.getDate() + 1); render(); };
+document.getElementById("todayBtn").onclick = () => { currentDate = new Date(); currentDate.setHours(0,0,0,0); render(); };
+
+render();
+</script>
+</body>
+</html>
